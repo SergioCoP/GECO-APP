@@ -1,0 +1,70 @@
+<div class="sidebar m-3 hidden" id="sidebar">
+    <div class="card border-0">
+        <div class="card-body rounded-corner shadow">
+            <div class="card border-0 mb-0 mb-lg-4" ng-style="styles.inactive">
+                <div class="card-body py-lg-2 rounded-corner d-flex flex-row align-items-center">
+                    <div class="me-2">
+                        <i class="user-icon bi bi-person-circle"></i>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <span class="fw-bold" ng-bind="rootConfig.user.username"></span>
+                        <span class="fw-light role" ng-bind="rootConfig.rol.description"></span>
+                    </div>
+                </div>
+                <span class="badge bg-danger mb-2" id="mode">MODO OFFLINE <br></span>
+                <span class="badge" ng-style="styles.active" ng-if="rootConfig.user.turn === 1 && rootConfig.rol.idRol === 3">Turno Matutino</span>
+                <span class="badge" ng-style="styles.active" ng-if="rootConfig.user.turn === 2 && rootConfig.rol.idRol === 3">Turno Vespertino</span>
+            </div>
+            <div role="button" class="card border-0" ng-style="loadSidebarItem(0)" ng-click="changeView(0)">
+                <div class="card-body rounded-corner d-flex flex-row">
+                    <i class="bi bi-bar-chart-line-fill"></i>
+                    <small class="ms-2">Panel de control</small>
+                </div>
+            </div>
+            <div role="button" class="card border-0" ng-style="loadSidebarItem(1)" ng-click="changeView(1)">
+                <div class="card-body rounded-corner d-flex flex-row">
+                    <i class="bi bi-grid-fill"></i>
+                    <small class="ms-2">Habitaciones</small>
+                </div>
+            </div>
+            <div role="button" ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="card border-0" ng-style="loadSidebarItem(2)" ng-click="changeView(2)">
+                <div class="card-body rounded-corner d-flex flex-row">
+                    <i class="bi bi-person-fill"></i>
+                    <small class="ms-2">Gestión de usuarios</small>
+                </div>
+            </div>
+            <div role="button" ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="card border-0" ng-style="loadSidebarItem(3)" ng-click="changeView(3)">
+                <div class="card-body rounded-corner d-flex flex-row">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <small class="ms-2">Rubros de revisión</small>
+                </div>
+            </div>
+            <div role="button" ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="card border-0" ng-style="loadSidebarItem(4)" ng-click="changeView(4)">
+                <div class="card-body rounded-corner d-flex flex-row">
+                    <i class="bi bi-bookmark-fill"></i>
+                    <small class="ms-2">Tipos de cuarto</small>
+                </div>
+            </div>
+            <div role="button" ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="card border-0 hidden" ng-style="loadSettings()" ng-click="showSiteSettings(true)" data-bs-target="#siteSettings" data-bs-toggle="modal">
+                <div class="card-body rounded-corner d-flex flex-row">
+                    <i class="bi bi-gear-wide-connected"></i>
+                    <small class="ms-2">Configuración del sitio</small>
+                </div>
+            </div>
+            <div role="button" ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="card border-0 hid-web" ng-style="loadSettings()" ng-click="showSiteSettings(false)" data-bs-target="#siteSettings" data-bs-toggle="modal">
+                <div class="card-body rounded-corner d-flex flex-row">
+                    <i class="bi bi-gear-wide-connected"></i>
+                    <small class="ms-2">Configuración del sitio</small>
+                </div>
+            </div>
+            <hr class="border-light my-4">
+            <div role="button" ng-click="logout()" class="card border-0">
+                <div class="card-body text-danger rounded-corner d-flex flex-row">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <small class="ms-2">Cerrar sesión</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="backdrop hidden" id="backdrop" ng-click="showSideBar()"></div>

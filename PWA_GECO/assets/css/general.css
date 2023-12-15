@@ -1,0 +1,179 @@
+body {
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+.upperbar-w-session {
+    background-color: #000;
+    padding: 8px 15px 8px 15px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.upperbar {
+    background-color: #326A6D;
+    padding: 8px 15px 8px 15px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.page-container {
+    height: calc(100vh - 66px);
+    display: flex;
+    flex-direction: row;
+}
+
+.text-principal {
+    color: #326A6D;
+}
+
+.overlay {
+    position: relative;
+}
+
+.overlay > label {
+    color: #aaaaaa;
+    position: absolute;
+    background-color: white;
+    padding: 0px 5px 0px 5px;
+    font-size: 14px;
+    top: -12px;
+    left: 20px;
+    transition: 0.25s;
+}
+
+.geco-input {
+    width: 100%;
+    border-radius: 7px;
+    border: 1px solid #d2d2d2;
+    height: 40px;
+    padding-left: 12px;
+    padding-right: 12px;
+    transition: 0.25s;
+
+    &:focus {
+        outline: none;
+        box-shadow: 0px 0px 0px 4px rgba(13, 109, 252, 0.2);
+        border: 1px solid #0d6efd;
+        transition: 0.25s;
+
+        &:invalid {
+            box-shadow: 0px 0px 0px 4px rgba(219, 56, 72, 0.2);
+            border: 1px solid #dc3545;
+            transition: 0.25s;
+        }
+    }
+}
+
+.geco-textarea {
+    width: 100%;
+    border-radius: 7px;
+    border: 1px solid #d2d2d2;
+    padding-left: 12px;
+    padding-right: 12px;
+    transition: 0.25s;
+
+    &:focus {
+        outline: none;
+        box-shadow: 0px 0px 0px 4px rgba(13, 109, 252, 0.2);
+        border: 1px solid #0d6efd;
+        transition: 0.25s;
+
+        &:invalid {
+            box-shadow: 0px 0px 0px 4px rgba(219, 56, 72, 0.2);
+            border: 1px solid #dc3545;
+            transition: 0.25s;
+        }
+    }
+}
+
+.color {
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+    background-color: #fff;
+}
+
+.geco-input:focus + label {
+    color: #0d6efd;
+    transition: 0.25s;
+}
+
+.geco-input:invalid:focus + label {
+    color: #dc3545;
+    transition: 0.25s;
+}
+
+.overlay > .error-info {
+    color: #dc3545;
+    font-size: 12px;
+}
+
+.rounded-corner {
+    border-radius: 6px;
+}
+
+.role {
+    font-size: 12px;
+}
+
+.circle-status {
+    width: 20px !important; 
+    height: 20px !important;
+}
+
+.user-icon {
+    font-size: 45px;
+}
+
+/* Medias queries */
+
+@media screen and (max-width: 425px) {
+    .hidden {
+        display: none !important;
+        transition: 0.25s;
+    }
+
+    .sidebar {
+        width: 250px;
+        position: absolute;
+        z-index: 4;
+    }
+
+    .sidebar + .backdrop {
+        z-index: 3;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .content-page {
+        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+}
+
+@media screen and (min-width: 426px) {
+    .hid-web {
+        display: none !important;
+    }
+
+    .sidebar {
+        width: 250px;
+    }
+
+    .content-page {
+        width: calc(100vw - 250px);
+    }
+
+    .scroll {
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: calc(100vh - 220px);
+    }
+}

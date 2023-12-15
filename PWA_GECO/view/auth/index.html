@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="GECO_PWA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../assets/css/loader.css">
+    <link rel="stylesheet" href="../../assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../assets/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="../../assets/css/general.css">
+    <link rel="stylesheet" href="../../assets/css/bootstrap-icons.min.css">
+    <link rel="shortcut icon" href="../../assets/img/favicon.PNG" type="image/x-icon">
+    <title>GECO | Centro de control</title>
+</head>
+<body class="z-0" ng-controller="INDEX_CONTROLLER" ng-init="loadPage()">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="../../assets/js/native-resources/camera.class.js"></script>
+    <script src="../../assets/js/angular.min.js"></script>
+    <script src="../../assets/js/app.js"></script>
+    <script src="../../assets/js/bootstrap.min.js"></script>
+    <script src="../../assets/js/sweetalert2.all.min.js"></script>
+    <script src="../../assets/js/controllers/index.controller.js"></script>
+    <script src="../../assets/js/controllers/dashboard.controller.js"></script>
+    <script src="../../assets/js/controllers/rooms.controller.js"></script>
+    <script src="../../assets/js/controllers/types.controller.js"></script>
+    <script src="../../assets/js/controllers/evi.controller.js"></script>
+    <script src="../../assets/js/controllers/users.controller.js"></script>
+
+    <div ng-if="loader" class="page-container d-flex align-items-center justify-content-center">
+        <div class="custom-loader"></div>
+    </div>
+
+    <!-- # Contenido de la página -->
+    <span ng-if="!loader">
+        <span ng-include onload="loadUpperbar()" src="'../template/upperbar.html'"></span>
+        <div class="page-container">
+            <!-- # Sidebar -->
+            <span ng-include src="'../template/sidebar.html'"></span>
+            <!-- # Sidebar -->
+            <!-- # Contenido -->
+            <div class="content-page p-3 py-3">
+                <span ng-if="rootConfig.page === 0" ng-include src="'./dashboard.html'"></span>
+                <span ng-if="rootConfig.page === 1" ng-include src="'./bedrooms.html'"></span>
+                <span ng-if="rootConfig.page === 2 && rootConfig.rol.name === 'ROLE_GERENTE'" ng-include src="'./users.html'"></span>
+                <span ng-if="rootConfig.page === 3 && rootConfig.rol.name === 'ROLE_GERENTE'" ng-include src="'./review-items.html'"></span>
+                <span ng-if="rootConfig.page === 4 && rootConfig.rol.name === 'ROLE_GERENTE'" ng-include src="'./types.html'"></span>
+            </div>
+            <!-- # Contenido -->
+
+            <!-- # Modal de configuración del sitio -->
+            <div class="modal fade" id="siteSettings" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <h3 class="fw-normal">Configuración del sitio</h3>
+                            <hr class="mb-4">
+                            <form name="formConfig" class="mt-4">
+                                <div class="row g-3">
+                                    <div class="col-12 form-group overlay">
+                                        <input type="text" id="hotelName" name="hotelName" ng-model="hotel.name" pattern="^[A-Za-z\s]*$" ng-trim="false" required class="geco-input" autocomplete="off">
+                                        <label for="">Nombre del hotel</label>
+                                        <span ng-if="formConfig.hotelName.$touched && (formConfig.hotelName.$error.required) && !formConfig.hotelName.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="formConfig.hotelName.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-6 form-group overlay">
+                                        <input type="color" ng-model="hotel.primaryColor" ng-value="hotel.primaryColor" id="color1" name="color1" class="geco-input color">
+                                        <label for="">Color principal</label>
+                                    </div>
+                                    <div class="col-6 form-group overlay">
+                                        <input type="color" ng-model="hotel.secondaryColor" ng-value="hotel.secondaryColor" id="color2" name="color2" class="geco-input color">
+                                        <label for="">Color secundario</label>
+                                    </div>
+                                    <div class="col-12 text-end">
+                                        <button class="btn btn-outline-secondary mt-3 py-2 hidden" type="button" data-bs-dismiss="modal" ng-click="showSiteSettings(true)">Cerrar</button>
+                                        <button class="btn btn-outline-secondary mt-3 py-2 hid-web" type="button" data-bs-dismiss="modal" ng-click="showSiteSettings(false)">Cerrar</button>
+                                        <button ng-if="formConfig.$invalid" type="button" class="btn btn-primary mt-3 py-2" disabled>Guardar</button>
+                                        <button ng-if="formConfig.$valid" type="button" ng-click="updateConfig()" data-bs-dismiss="modal" class="btn btn-primary mt-3 py-2">Guardar</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- # Modal de configuración del sitio -->
+        </div>
+    </span>
+    <!-- # Contenido de la página -->
+</body>
+</html>

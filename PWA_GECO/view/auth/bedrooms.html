@@ -1,0 +1,324 @@
+<span ng-controller="ROOMS_CONTROLLER" ng-init="findRoom()">
+    <div ng-if="loader" class="d-flex h-100 align-items-center justify-content-center">
+        <div class="custom-loader"></div>
+    </div>
+    <div ng-if="!loader">
+        <h3 class="fw-normal" id="xd">Habitaciones</h3>
+        <div ng-if="typeList.length === 0" class="mt-3 col-12">
+            <div class="alert alert-warning">Aún no hay registros sobre "Tipos de cuarto", profavor registre un tipo de cuarto para poder utilizar este apartado.</div>
+        </div>
+        <div ng-if="roomListShowed.length === 0 && typeList.length !== 0" class="mt-3 col-12">
+            <div ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="alert alert-warning">Aún no hay registros, da click <b role="button" data-bs-toggle="modal" data-bs-target="#saveRoom">aquí</b> para agregar un nuevo registro</div>
+            <div ng-if="rootConfig.rol.name === 'ROLE_RECEPCIONISTA'" class="alert alert-warning">Aún no hay cuartos registrados o todos los cuartos están en proceso de revisión, en cuanto se registren cuartos o que los cuartos existentes pasen la revisión, todos los registros aparecerán aqui.</div>
+            <div ng-if="rootConfig.rol.name === 'ROLE_LIMPIEZA'" class="alert alert-warning">Aún no hay cuartos para revisión o aún no tiene cuartos asignado, en cuanto se le asigne un cuarto o cuando el mismo sea desalojado, el registro aparecerá aquí.</div>
+        </div>
+        <div ng-if="roomListShowed.length !== 0 && typeList.length !== 0" class="my-3 d-flex flex-row">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Buscar por identificador">
+                <button class="btn btn-primary rounded-end" type="button" id="button-addon2"><i class="bi bi-search"></i></button>
+                <button ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="btn btn-outline-success ms-2 px-2 py-0 rounded-start" ng-click="clearForm()" data-bs-toggle="modal" data-bs-target="#saveRoom"><i class="fs-4 bi bi-plus-lg"></i></button>
+                <button ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="btn btn-success px-3 py-0" ng-click="clearForm()" data-bs-toggle="modal" data-bs-target="#saveRoom"><i class="bi bi-grid-fill"></i></button>
+            </div>
+        </div>
+
+        <!-- # Contenido App WEB / Responsive -->
+        <div class="scroll" ng-if="roomListShowed.length !== 0 && typeList.length !== 0" class="my-3">
+            <div class="row g-4">
+                <div class="col-12 col-lg-4" ng-repeat="room in roomListShowed track by room.idRoom">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex mb-3 flex-row align-items-start">
+                                <span class="fw-bold">{{room.name ? room.name : 'NC-'+room.roomNumber}}</span>
+                                <div ng-class="{
+                                    'alert-success': room.status === 1,
+                                    'alert-secondary': room.status === 2,
+                                    'alert-primary': room.status === 3,
+                                    'alert-warning': room.status === 4,
+                                    'alert-danger': room.status === 5
+                                }" class="ms-auto rounded-circle border-0 circle-status alert p-3 m-0"></div>
+                            </div>
+                            <div class="col-12 d-flex flex-row align-items-end">
+                                <div class="mt-3" ng-if="rootConfig.rol.name === 'ROLE_GERENTE'">
+                                    <button class="btn btn-primary py-1 px-2" ng-click="modify(room)" data-bs-toggle="modal" data-bs-target="#updateRoom"><i class="fw-bold bi bi-pencil-fill"></i></button>
+                                    <button ng-if="room.status === 3" class="btn btn-primary py-1 px-2" data-bs-toggle="modal" data-bs-target="#checkinRoom" ng-click="prepareToEvaluate(room)"><i class="fw-bold bi bi-clipboard-check-fill"></i></button>
+                                    <button ng-if="room.status >= 3" ng-click="findIncidences(room)" data-bs-toggle="modal" data-bs-target="#roomIncidences" class="btn btn-warning py-1 px-2"><i class="fw-bold bi bi-exclamation-triangle-fill"></i></button>
+                                </div>
+                                <div class="mt-3" ng-if="rootConfig.rol.name === 'ROLE_RECEPCIONISTA'">
+                                    <button ng-if="room.status === 1" ng-click="rent(room.idRoom)" class="btn btn-success py-1 px-2"><i class="fw-bold bi bi-currency-dollar"></i></button>
+                                    <button ng-if="room.status === 2" ng-click="left(room.idRoom)" class="btn btn-secondary py-1 px-2"><i class="fw-bold bi bi-sign-turn-slight-right-fill"></i></button>
+                                </div>
+                                <div class="mt-3" ng-if="rootConfig.rol.name === 'ROLE_LIMPIEZA'">
+                                    <button ng-if="room.status === 5" class="btn btn-success py-1 px-2" ng-click="setAsCleaned(room.idRoom)"><i class="fw-bold bi bi-check"></i></button>
+                                    <button ng-if="room.status === 4 || room.status === 5" ng-click="findIncidences(room)" data-bs-toggle="modal" data-bs-target="#roomIncidences" class="btn btn-warning py-1 px-2"><i class="fw-bold bi bi-exclamation-triangle-fill"></i></button>
+                                </div>
+                                <div class="ms-auto text-end">
+                                    <small ng-if="room.name" class="me-2 text-muted">({{'NC-'+room.roomNumber}})</small><br>
+                                    <span class="badge" ng-style="styles.active" ng-bind="room.idTypeRoom.name"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- # Contenido App WEB / Responsive -->
+        <div class="my-5 hid-web text-white">.</div>
+
+        <div class="modal fade" id="saveRoom" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content z-3">
+                    <div class="modal-body">
+                        <h3 class="fw-normal">Crear nuevo cuarto</h3>
+                        <hr class="mb-4">
+                        <form name="formRoom" class="mt-4">
+                            <div class="row g-3">
+                                <div class="col-12 form-group overlay">
+                                    <input type="text" id="roomName" name="roomName" ng-model="room.name" ng-trim="false" class="geco-input" autocomplete="off">
+                                    <label for="">Nombre</label>
+                                    <span ng-if="formRoom.roomName.$touched && (formRoom.roomName.$error.required) && !formRoom.roomName.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                    <span ng-if="formRoom.roomName.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                </div>
+                                <div class="col-12 form-group overlay">
+                                    <select class="geco-input" ng-options="typo as typo.name for typo in typeList track by typo.idTypeRoom" ng-model="room.idTypeRoom" required>
+                                    </select>
+                                    <label for="">Tipo de cuarto</label>
+                                    <span ng-if="formRoom.username.$touched && (formRoom.username.$error.required) && !formRoom.username.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                    <span ng-if="formRoom.username.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button class="btn btn-outline-secondary mt-3 py-2" type="button" data-bs-dismiss="modal">Cerrar</button>
+                                    <button ng-if="false" type="button" class="btn btn-primary mt-3 py-2" disabled>Guardar</button>
+                                    <button ng-if="true" type="button" ng-click="create()" class="btn btn-primary mt-3 py-2" data-bs-dismiss="modal">Guardar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="updateRoom" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content z-3">
+                    <div class="modal-body">
+                        <h3 class="fw-normal">Modificar  cuarto</h3>
+                        <hr class="mb-4">
+                        <form name="formRoom" class="mt-4">
+                            <div class="row g-3">
+                                <div class="col-12 form-group overlay">
+                                    <input type="text" id="roomName" name="roomName" ng-model="room.name" ng-trim="false" class="geco-input" autocomplete="off">
+                                    <label for="">Nombre</label>
+                                    <span ng-if="formRoom.roomName.$touched && (formRoom.roomName.$error.required) && !formRoom.roomName.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                    <span ng-if="formRoom.roomName.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                </div>
+                                <div class="col-12 form-group overlay">
+                                    <select class="geco-input" ng-options="typo as typo.name for typo in typeList track by typo.idTypeRoom" ng-model="room.idTypeRoom" required>
+                                    </select>
+                                    <label for="">Tipo de cuarto</label>
+                                    <span ng-if="formRoom.username.$touched && (formRoom.username.$error.required) && !formRoom.username.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                    <span ng-if="formRoom.username.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                </div>
+                                <div class="col-12 form-group overlay">
+                                    <select class="geco-input" ng-options="user as user.fullName for user in userListM track by user.idUser" ng-model="room.firstIdUser" required>
+                                    </select>
+                                    <label for="">Personal de limpieza (Turno matutino)</label>
+                                    <span ng-if="formRoom.username.$touched && (formRoom.username.$error.required) && !formRoom.username.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                    <span ng-if="formRoom.username.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                </div>
+                                <div class="col-12 form-group overlay">
+                                    <select class="geco-input" ng-options="user as user.fullName for user in userListV track by user.idUser" ng-model="room.secondIdUser" required>
+                                    </select>
+                                    <label for="">Personal de limpieza (Turno vespertino)</label>
+                                    <span ng-if="formRoom.username.$touched && (formRoom.username.$error.required) && !formRoom.username.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                    <span ng-if="formRoom.username.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button class="btn btn-outline-secondary mt-3 py-2" type="button" data-bs-dismiss="modal">Cerrar</button>
+                                    <button ng-if="false" type="button" class="btn btn-primary mt-3 py-2" disabled>Actualizar</button>
+                                    <button ng-if="true" type="button" ng-click="sendUpdate()" class="btn btn-primary mt-3 py-2" data-bs-dismiss="modal">Actualizar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="checkinRoom" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content z-3">
+                    <div class="modal-body">
+                        <h3 class="fw-normal">Proceso de reivisión</h3>
+                        <hr class="mb-4">
+                        <span class="fw-bold">Nombre o identificador del cuarto:</span><br>
+                        <span><span class="fw-lighter">{{room.name ? room.name : 'NC-'+room.roomNumber}}</span> <span class="badge" ng-style="styles.active" ng-bind="room.idTypeRoom.name"></span></span>
+                        <form name="formRoom" class="mt-4">
+                            <div class="table-responsive rounded-corner">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead>
+                                        <tr class="table-secondary">
+                                            <th>Rubros a evaluar</th>
+                                            <th class="text-center">Cumple?</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-if="room.idTypeRoom.evaluationItems.length === 0">
+                                            <td colspan="2">
+                                                <div class="alert alert-warning">Aún no se han asignado rubros de revisión</div>
+                                            </td>
+                                        </tr>
+                                        <tr ng-if="room.idTypeRoom.evaluationItems.length !== 0" ng-repeat="item in evaluation track by item.idEvi">
+                                            <td ng-bind="item.nameEvi"></td>
+                                            <td class="text-center">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" required type="radio" ng-name="item.nameEvi" id="inlineRadio1" ng-model="item.radioValue" ng-value="1">
+                                                    <label class="form-check-label" for="inlineRadio1">Sí</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" required type="radio" ng-name="item.nameEvi" id="inlineRadio2" ng-model="item.radioValue" ng-value="2">
+                                                    <label class="form-check-label" for="inlineRadio2">No</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-12 mt-3 text-end">
+                                <button class="btn btn-outline-secondary mt-3 py-2" type="button" data-bs-dismiss="modal">Cerrar</button>
+                                <button ng-if="false" type="button" class="btn btn-danger mt-3 py-2" disabled>Terminar revisión</button>
+                                <button ng-if="true" type="button" ng-click="checkList()" class="btn btn-danger mt-3 py-2" data-bs-dismiss="modal">Terminar revisión</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="roomIncidences" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content z-3">
+                    <div class="modal-body">
+                        <h3 class="fw-normal">Historial de incidencias</h3>
+                        <hr class="mb-4">
+                        <form name="" class="mt-4">
+                            <div class="table-responsive rounded-corner">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead>
+                                        <tr class="table-secondary">
+                                            <th class="text-center">Encontrada el</th>
+                                            <th class="text-center">Resuelta el</th>
+                                            <th class="text-center">Ver detalles</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-if="incidenceList.length === 0">
+                                            <td colspan="4">
+                                                <div class="alert alert-warning">Aún no se han registrado incidencias</div>
+                                            </td>
+                                        </tr>
+                                        <tr ng-if="incidenceList.length !== 0" ng-repeat="item in incidenceList track by item.idIncidence">
+                                            <td class="text-center" ng-bind="item.discoveredOn"></td>
+                                            <td class="text-center">{{item.resolvedOn ? item.resolvedOn : 'n/a'}}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary py-1 px-2" ng-click="getIncidenceDetails(item)" data-bs-toggle="modal" data-bs-target="#detailsIncidence"><i class="fw-bold bi bi-info-circle-fill"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-12 mt-3 text-end">
+                                <button class="btn btn-outline-secondary mt-3 py-2" type="button" data-bs-dismiss="modal">Cerrar</button>
+                                <button ng-if="true" type="button" ng-click="initCamera()" data-bs-toggle="modal" data-bs-target="#saveIncidence" class="btn btn-danger mt-3 py-2" data-bs-dismiss="modal">Registrar incidencia</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="saveIncidence" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content z-3">
+                    <div class="modal-body">
+                        <h3 class="fw-normal">Registrar de incidencia</h3>
+                        <hr class="mb-4">
+                        <form name="incidenceForm" class="mt-4">
+                            <div class="row g-3">
+                                <div class="col-12 text-center">
+                                    <video id="player" autoplay style="height: 300px"></video>
+                                    <button type="button" ng-click="takePhoto()" class="btn btn-outline-secondary mt-3 py-2">Tomar foto</button>
+                                </div>
+                                <div class="col-12 form-group overlay">
+                                    <textarea rows="3" id="description" name="description" ng-model="incidence.description" ng-trim="false" required class="geco-textarea" autocomplete="off"></textarea>
+                                    <label for="">Detalles de la incidencia</label>
+                                    <span ng-if="incidenceForm.description.$touched && (incidenceForm.description.$error.required)" class="error-info">Este campo es obligatorio</span>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-3 text-end">
+                                <button class="btn btn-outline-secondary mt-3 py-2" type="button" data-bs-dismiss="modal">Cerrar</button>
+                                <button ng-if="true" type="button" ng-click="saveIncidence()" data-bs-toggle="modal" data-bs-target="#saveIncidence" class="btn btn-danger mt-3 py-2" data-bs-dismiss="modal">Registrar incidencia</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="detailsIncidence" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content z-3">
+                    <div class="modal-body">
+                        <h3 class="fw-normal">Detalles de la incidencia</h3>
+                        <hr class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-12 text-center">
+                                <img src="{{'data:image/png;base64,'+incidence.image}}" alt="">
+                            </div>
+                            <div class="col-12">
+                                <div class="table-responsive rounded-corner">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr class="table-secondary">
+                                                <th>Registrado por</th>
+                                                <th class="text-center">Día y hora</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{incidence.idUser.idPerson.name + ' ' + incidence.idUser.idPerson.surname + (incidence.idUser.idPerson.lastname ? ' ' + incidence.idUser.idPerson.lastname : '')}}</td>
+                                                <td class="text-center" ng-bind="incidence.discoveredOn"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="mt-3 table-responsive rounded-corner">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr class="table-secondary">
+                                                <th>Descripción</th>
+                                                <th class="text-center">Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td ng-bind="incidence.description"></td>
+                                                <td class="text-center">
+                                                    <span class="fw-bold mb-0 py-0 px-3 alert border-0" ng-class="{'alert-warning': incidence.status === 0, 'alert-success': incidence.status === 1}"><small>{{incidence.status === 0 ? 'Pendiente' : 'Resuelta'}}</small></span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3 text-end">
+                            <button class="btn btn-outline-secondary mt-3 py-2" type="button" data-bs-target="#roomIncidences" data-bs-toggle="modal"  data-bs-dismiss="modal">Regresar</button>
+                            <button ng-if="incidence.status === 0" type="button" ng-click="resolveIncidence()" class="btn btn-success mt-3 py-2" data-bs-dismiss="modal">Marcar como resuelta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</span>

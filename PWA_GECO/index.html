@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="GECO_PWA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/css/loader.css">
+    <link rel="stylesheet" href="./assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./assets/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="./assets/css/general.css">
+    <link rel="stylesheet" href="./assets/css/bootstrap-icons.min.css">
+    <link rel="shortcut icon" href="./assets/img/favicon.PNG" type="image/x-icon">
+    <link rel="manifest" href="./manifest.json">
+    <title>GECO | Inicio de sesión</title>
+</head>
+<body ng-controller="LOGIN_CONTROLLER">
+    <script src="./assets/js/sweetalert2.all.min.js"></script>
+    <script src="./assets/js/angular.min.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/controllers/login.controller.js"></script>
+    <script src="./assets/js/pwa.js"></script>
+    <!-- # Barra de navegación superior -->
+    <div class="upperbar">
+        <img src="./assets/img/logo-circle.PNG" style="height: 50px; width: 50px;" alt="Palcehold.co">
+        <span class="ms-2 text-white fw-bold">GECO | Gestor de Cuartos de Hotel</span>
+    </div>
+    <!-- # Barra de navegación superior -->
+
+    <!-- # Contenido de la página -->
+    <div ng-if="loader" class="page-container d-flex align-items-center justify-content-center">
+        <div class="custom-loader"></div>
+    </div>
+    <div class="page-container">
+        <div class="row px-0 py-5 m-0 w-100" style="overflow-y: auto;">
+            <!-- # Formulario de inicio de sesión -->
+            <div ng-if="form" class="col-12 col-lg-6">
+                <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
+                    <div class="card mb-5 col-11 col-lg-8 border-0 shadow">
+                        <div class="card-body">
+                            <p class="d-flex align-items-center justify-content-center">
+                                <span class="fs-3 fw-bold text-principal">GECO</span>
+                                <span style="height: 30px; width: 1px;" class="bg-dark mx-2"></span>
+                                <span class="fs-5 fw-lighter"> Inicio de Sesión</span>
+                            </p>
+                            <form class="mt-4" name="loginForm">
+                                <div class="row g-4">
+                                    <div class="col-12 form-group overlay">
+                                        <input type="text" id="user" name="user" ng-model="user.user" ng-trim="false" required class="geco-input" autocomplete="off"> 
+                                        <label for="">Usuario o correo electrónico</label>
+                                        <span ng-if="loginForm.user.$touched && (loginForm.user.$error.required) && !loginForm.user.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="loginForm.user.$error.pattern" class="error-info">Favor de colocar un correo válido</span>
+                                    </div>
+                                    <div class="col-12 form-group overlay">
+                                        <input type="password" id="password" name="password" ng-model="user.password" pattern="^(?=.*[A-Z])(?=.*[#._])(?=.*[0-9])[a-zA-Z#._0-9]{8,}$" required class="geco-input" autocomplete="off">
+                                        <label for="">Contraseña</label>
+                                        <span ng-if="loginForm.password.$touched && (loginForm.password.$error.required) && !loginForm.password.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="loginForm.password.$error.pattern" class="error-info">
+                                            Favor de cumplir con el formato:
+                                            <ul class="mb-0">
+                                                <li>Longitud mínima de 8 caracteres</li>
+                                                <li>Una mayúscula</li>
+                                                <li>Un numero</li>
+                                                <li>Un caracter especial (# _ .)</li>
+                                            </ul>
+                                        </span>
+                                    </div>
+                                    <div ng-if="error" class="col-12">
+                                        <div class="alert alert-warning mb-0">
+                                            <b>Las credenciales proporcionadas no existen.</b> Si usted cree que esto es un error, favor de comunicarse con un administrador.
+                                        </div>
+                                    </div>
+                                    <!--sdsdsd-->
+                                    <div class="col-12">
+                                        <button ng-if="loginForm.$invalid" type="button" class="btn btn-secondary mt-3 py-2 col-12" disabled>Iniciar sesión</button>
+                                        <button ng-if="loginForm.$valid" type="submit" class="btn btn-secondary mt-3 py-2 col-12 d-flex flex-row justify-content-center" ng-disabled="loginButtonLoader">Iniciar sesión<div ng-show="loginButtonLoader" class="ms-3 small-loader"></div></button>
+                                        <a class="btn btn-outline-secondary mt-3 py-2 col-12" ng-click="changeForm()">¡Registrate!</a>
+                                        <p class="text-center mt-4"><a href="">¿Olvidaste tu contraseña?</a></p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- # Formulario de inicio de sesión -->
+            
+            <!-- # Formulario de registro -->
+            <div ng-if="!form" class="col-12 col-lg-6 mb-5 mb-lg-0">
+                <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
+                    <div class="card col-11 col-lg-8 border-0 shadow">
+                        <div class="card-body">
+                            <p class="d-flex align-items-center justify-content-center">
+                                <span class="fs-3 fw-bold text-principal">GECO</span>
+                                <span style="height: 30px; width: 1px;" class="bg-dark mx-2"></span>
+                                <span class="fs-5 fw-lighter"> Formulario de Registro</span>
+                            </p>
+                            <form class="mt-4" name="registerForm">
+                                <div class="row g-4">
+                                    <div class="col-12 text-center">
+                                        <h6 class="mt-3 text-muted">Datos del propietario del hotel</h6>
+                                    </div>
+                                    <div class="col-12 form-group overlay">
+                                        <input type="text" id="name" name="name" ng-model="user.idPerson.name" ng-trim="false" required class="geco-input" autocomplete="off">
+                                        <label for="">Nombre</label>
+                                        <span ng-if="registerForm.name.$touched && (registerForm.name.$error.required) && !registerForm.name.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="registerForm.name.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-group overlay">
+                                        <input type="text" id="surname" name="surname" ng-model="user.idPerson.surname"  required class="geco-input" autocomplete="off">
+                                        <label for="">Apellido Paterno</label>
+                                        <span ng-if="registerForm.surname.$touched && (registerForm.surname.$error.required) && !registerForm.surname.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="registerForm.surname.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-group overlay">
+                                        <input type="text" id="lastname" name="lastname" ng-model="user.idPerson.lastname"  class="geco-input" autocomplete="off">
+                                        <label for="">Apellido Materno</label>
+                                        <span ng-if="registerForm.lastname.$touched && !registerForm.lastname.$error.pattern" class="error-info text-primary">Este campo es opcional</span>
+                                        <span ng-if="registerForm.lastname.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-group overlay">
+                                        <input type="text" id="email" name="email" ng-model="user.email"  required class="geco-input" autocomplete="off">
+                                        <label for="">Correo electrónico</label>
+                                        <span ng-if="registerForm.email.$touched && (registerForm.email.$error.required) && !registerForm.email.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="registerForm.email.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-group overlay">
+                                        <input type="text" id="username" name="username" ng-model="user.username"  required class="geco-input" autocomplete="off">
+                                        <label for="">Nombre de usuario</label>
+                                        <span ng-if="registerForm.username.$touched && (registerForm.username.$error.required) && !registerForm.username.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="registerForm.username.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-group overlay">
+                                        <input type="password" id="password" name="password" ng-model="user.password"  required class="geco-input" autocomplete="off">
+                                        <label for="">Contraseña</label>
+                                        <span ng-if="registerForm.password.$touched && (registerForm.password.$error.required) && !registerForm.password.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="registerForm.password.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-12 col-md-6 form-group overlay">
+                                        <input type="password" id="confirmation" name="confirmation" ng-model="passwordConfirmation"  required class="geco-input" autocomplete="off">
+                                        <label for="">Confirmar contraseña</label>
+                                        <span ng-if="registerForm.confirmation.$touched && (registerForm.confirmation.$error.required) && !registerForm.confirmation.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="registerForm.confirmation.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-12 text-center">
+                                        <h6 class="mt-3 text-muted">Datos del hotel (Configuración inicial)</h6>
+                                    </div>
+                                    <div class="col-12 form-group overlay">
+                                        <input type="text" id="hotelName" name="hotelName" ng-model="user.idHotel.name" ng-trim="false" required class="geco-input" autocomplete="off">
+                                        <label for="">Nombre del hotel</label>
+                                        <span ng-if="registerForm.hotelName.$touched && (registerForm.hotelName.$error.required) && !registerForm.hotelName.$error.pattern" class="error-info">Este campo es obligatorio</span>
+                                        <span ng-if="registerForm.hotelName.$error.pattern" class="error-info">Este campo solo acepta</span>
+                                    </div>
+                                    <div class="col-12 form-group overlay">
+                                        <input type="file" id="hotelImage" name="hotelImage" class="geco-input">
+                                        <label for="">Logo del hotel</label>
+                                        <span ng-if="registerForm.hotelImage.$touched && (registerForm.hotelImage.$error.required)" class="error-info">Este campo es obligatorio</span>
+                                    </div>
+                                    <div class="col-6 form-group overlay">
+                                        <input type="color" ng-model="user.idHotel.primaryColor" value="#326A6D" id="color1" name="color1" class="geco-input color">
+                                        <label for="">Color principal</label>
+                                    </div>
+                                    <div class="col-6 form-group overlay">
+                                        <input type="color" ng-model="user.idHotel.secondaryColor" value="#18CB70" id="color2" name="color2" class="geco-input color">
+                                        <label for="">Color secundario</label>
+                                    </div>
+                                    <div class="col-12">
+                                        <button ng-if="registerForm.$invalid" type="button" class="btn btn-secondary mt-3 py-2 col-12" disabled>Registrarme</button>
+                                        <button ng-if="registerForm.$valid" type="submit" class="btn btn-secondary mt-3 py-2 col-12">Registrarme</button>
+                                        <a class="btn btn-outline-secondary mt-3 py-2 col-12" ng-click="changeForm()">Iniciar sesión</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- # Formulario de registro -->
+            
+            <!-- # Iconon de la aplicación -->
+            <div class="col-12 col-lg-6 hidden">
+                <div class="d-flex justify-content-center align-items-start" style="height: 100%;">
+                    <img src="./assets/img/logo-square.PNG" style="width: 500px; height: 500px;" alt="">
+                </div>
+            </div>
+            <!-- # Iconon de la aplicación -->
+        </div>
+    </div>
+    <!-- # Contenido de la página -->
+</body>
+</html>

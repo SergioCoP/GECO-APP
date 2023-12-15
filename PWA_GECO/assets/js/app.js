@@ -1,0 +1,1 @@
+const app = angular.module('GECO_PWA', []);

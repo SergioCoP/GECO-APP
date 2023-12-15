@@ -1,0 +1,155 @@
+<span ng-controller="DASHBOARD_CONTROLLER" ng-init="findRooms()">
+    <div ng-if="loader" class="d-flex h-100 align-items-center justify-content-center">
+        <div class="custom-loader"></div>
+    </div>
+    <div ng-if="!loader">
+        <h3 class="fw-normal">Panel de control</h3>
+        <div class="col-12 mt-3" ng-if="roomListShowed.length === 0 || roomListShowed === undefined">
+            <diV ng-if="rootConfig.rol.name === 'ROLE_GERENTE'" class="alert alert-warning">Aún no hay cuartos registrados, para visualizar el panel de control es necesario que cuente con cuartos registrados.</div>
+            <div ng-if="rootConfig.rol.name === 'ROLE_RECEPCIONISTA'" class="alert alert-warning">Aún no hay cuartos registrados o todos los cuartos están en proceso de revisión, en cuanto se registren cuartos o que los cuartos existentes pasen la revisión, todos los registros aparecerán aqui.</div>
+            <div ng-if="rootConfig.rol.name === 'ROLE_LIMPIEZA'" class="alert alert-warning">Aún no hay cuartos para revisión o aún no tiene cuartos asignado, en cuanto se le asigne un cuarto o cuando el mismo sea desalojado, el registro aparecerá aquí.</div>
+        </div>
+        <div ng-if="roomListShowed.length !== 0 && roomListShowed !== undefined" class="card mt-3 border-0 shadow">
+            <div class="card-body p-2 rounded-corner">
+                <div class="row">
+                    <div class="col-12 col-lg-3 d-flex justify-content-center align-items-center">
+                        <div class="my-3 d-flex flex-column text-center">
+                            <small class="fw-bold">Total de habitaciones</small>
+                            <h1 class="fw-lighter" ng-bind="roomList.length"></h1>
+                        </div>
+                    </div>
+                    <!-- # Contenido App Responsive -->
+                    <div class="col-12 hid-web">
+                        <div class="d-flex flex-row">
+                            <div class="alert py-2 mb-2 w-100 border-0 rounded-0 rounded-start alert-success d-flex flex-column justify-content-center align-items-center">
+                                <small class="fw-bold">Disponibles</small>
+                                <h4 class="fw-lighter" ng-bind="counts.toSell"></h4>
+                            </div>
+                            <div class="alert py-2 mb-2 w-100 border-0 rounded-0 rounded-end alert-secondary d-flex flex-column justify-content-center align-items-center">
+                                <small class="fw-bold">En uso</small>
+                                <h4 class="fw-lighter" ng-bind="counts.inUse"></h4>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-row">
+                            <div class="alert py-2 mb-0 w-100 border-0 rounded-0 rounded-start alert-primary d-flex flex-column justify-content-center align-items-center">
+                                <small class="fw-bold">Limpias</small>
+                                <h4 class="fw-lighter" ng-bind="counts.checked"></h4>
+                            </div>
+                            <div class="alert py-2 mb-0 w-100 border-0 rounded-0 alert-warning d-flex flex-column justify-content-center align-items-center">
+                                <small class="fw-bold">Con detalles</small>
+                                <h4 class="fw-lighter" ng-bind="counts.wIncidence"></h4>
+                            </div>
+                            <div class="alert py-2 mb-0 w-100 border-0 rounded-0 rounded-end alert-danger d-flex flex-column justify-content-center align-items-center">
+                                <small class="fw-bold">Sucias</small>
+                                <h4 class="fw-lighter" ng-bind="counts.unchecked"></h4>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- # Contenido App Responsive -->
+        
+                    <!-- # Contenido App WEB -->
+                    <div class="col-9 hidden">
+                        <div class="card-group h-100">
+                            <div class="card alert border-0 alert-success d-flex justify-content-center align-items-center">
+                                <small class="fw-bold">Disponibles</small>
+                                <h2 class="fw-lighter" ng-bind="counts.toSell"></h2>
+                            </div>
+                            <div class="card alert border-0 alert-secondary d-flex justify-content-center align-items-center">
+                                <small class="fw-bold">En uso</small>
+                                <h2 class="fw-lighter" ng-bind="counts.inUse"></h2>
+                            </div>
+                            <div class="card alert border-0 alert-primary d-flex justify-content-center align-items-center">
+                                <small class="fw-bold">Limpias</small>
+                                <h2 class="fw-lighter" ng-bind="counts.checked"></h2>
+                            </div>
+                            <div class="card alert border-0 alert-warning d-flex justify-content-center align-items-center">
+                                <small class="fw-bold">Con detalles</small>
+                                <h2 class="fw-lighter" ng-bind="counts.wIncidence"></h2>
+                            </div>
+                            <div class="card alert border-0 alert-danger d-flex justify-content-center align-items-center">
+                                <small class="fw-bold">Sucias</small>
+                                <h2 class="fw-lighter" ng-bind="counts.unchecked"></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- # Contenido App WEB -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- # Contenido App Responsive -->
+        <div ng-if="roomListShowed.length !== 0" class="mt-3 scroll" style="height: calc(100vh - 290px) !important;">
+            <div class="row g-3">
+                <div class="col-12 col-lg-4" ng-repeat="room in roomListShowed track by room.idRoom">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold">{{room.name ? room.name : 'NC-'+room.roomNumber}}</span>
+                                    <div class="mt-2">
+                                        <span class="badge" ng-style="styles.active" ng-bind="room.idTypeRoom.name"></span>
+                                        <small ng-if="room.name" class="me-2 text-muted">({{'NC-'+room.roomNumber}})</small>
+                                    </div>
+                                </div>
+                                <div ng-class="{
+                                    'alert-success': room.status === 1,
+                                    'alert-secondary': room.status === 2,
+                                    'alert-primary': room.status === 3,
+                                    'alert-warning': room.status === 4,
+                                    'alert-danger': room.status === 5,
+                                }" class="ms-auto rounded-circle border-0 circle-status alert p-3 m-0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- # Contenido App Responsive -->
+        <div class="my-5 hid-web text-white">.</div>
+        
+        <!-- #Modales -->
+        <div class="modal fade" id="roomDetails" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="d-flex flex-row align-items-center">
+                            <span class="fs-3">Habitación:</span>
+                            <span class="fs-3 ms-2 fw-lighter">ID-XX</span>
+                            <div class="ms-auto card alert py-0 px-4 m-0 border-0 alert-danger">
+                                <div class="card-body text-center fw-bold p-0 m-0">
+                                    <small>Sin revisión</small>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="mb-4">
+                        <div class="row mt-4">
+                            <div class="col-12 text-end">
+                                <button class="btn btn-outline-secondary mt-3 py-2" type="button" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal fade" id="roomIncidences" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="d-flex flex-row align-items-center">
+                            <span class="fs-3">Incidencias:</span>
+                            <span class="fs-3 ms-2 fw-lighter">ID-XX</span>
+                        </div>
+                        <hr class="mb-4">
+                        <div class="row mt-4">
+                            <div class="col-12 text-end">
+                                <button class="btn btn-outline-secondary mt-3 py-2" type="button" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- #Modales -->
+    </div>
+</span>

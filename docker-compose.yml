@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+  api:
+    build:
+      context: ./GECO-RESTSERVICES
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    networks:
+      - geconet
+    links:
+      - db
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/geco?serverTimezone=UTC&useLegacyDateTimeCode=false&createDatabaseIfNotExist=TRUE
+      SPRING_DATASOURCE_USERNAME: geco
+      SPRING_DATASOURCE_PASSWORD: geco123
+  db:
+    image: mysql:8.0
+    networks:
+      - geconet
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: geco
+      MYSQL_USER: geco
+      MYSQL_PASSWORD: geco123
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+  app:
+    image: nginx
+    links:
+      - api
+    networks:
+      - geconet
+    volumes:
+      - ./PWA_GECO/:/usr/share/nginx/html
+    ports:
+      - "3000:80"
+
+
+networks:
+  geconet:
+    driver: bridge
